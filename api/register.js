@@ -123,7 +123,6 @@ export default async function handler(req, res) {
     });
   }
 
-  // Fallback: if Ambassador still sends identity, use it as agent_name
   if (!manifest.agent_name && manifest.identity) {
     manifest.agent_name = manifest.identity;
   }
@@ -146,19 +145,19 @@ export default async function handler(req, res) {
   try {
     const existing = await getFile(filePath);
 
-const fileWrite = await putFile(
-  filePath,
-  manifest,
-  `Register agent: ${agentId}`,
-  existing ? existing.sha : undefined
-);
+    const fileWrite = await putFile(
+      filePath,
+      manifest,
+      `Register agent: ${agentId}`,
+      existing ? existing.sha : undefined
+    );
 
-if (![200, 201].includes(fileWrite.status)) {
-  return res.status(500).json({
-    status: 'error',
-    message: `GitHub file write failed (${fileWrite.status})`
-  });
-}
+    if (![200, 201].includes(fileWrite.status)) {
+      return res.status(500).json({
+        status: 'error',
+        message: `GitHub file write failed (${fileWrite.status})`
+      });
+    }
 
     const registryPath = 'registry.json';
     const registryFile = await getFile(registryPath);
@@ -189,12 +188,19 @@ if (![200, 201].includes(fileWrite.status)) {
 
     registry.generated_at = now.toISOString();
 
-    await putFile(
+    const registryWrite = await putFile(
       registryPath,
       registry,
       `Update registry: ${agentId}`,
       registrySha
     );
+
+    if (![200, 201].includes(registryWrite.status)) {
+      return res.status(500).json({
+        status: 'error',
+        message: `GitHub registry update failed (${registryWrite.status})`
+      });
+    }
 
     return res.status(200).json({
       status: 'accepted',
