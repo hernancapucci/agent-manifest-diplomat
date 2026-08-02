@@ -1,24 +1,24 @@
 const https = require('https');
-const Ajv2020 = require('ajv/dist/2020');
-const addFormats = require('ajv-formats');
-const schema = require('./schema.json');
+const { validate: validateAgainstSchema } = require('@agent-manifest/client/validate');
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER || 'agent-manifest';
 const DATASET_REPO = process.env.DATASET_REPO || 'agent-manifest-dataset';
 
-// Single authoritative validator: the canonical Agent Manifest v1.0 schema,
-// vendored byte-for-byte from agent-manifest/spec/v1.0/schema.json.
-const ajv = new Ajv2020({ allErrors: true, strict: false });
-addFormats(ajv);
-const validate = ajv.compile(schema);
-
+// Single authoritative validator, and no longer this repository's own: the
+// schema and the checking both come from @agent-manifest/client, which carries
+// the canonical Agent Manifest v1.0 schema as a dependency. The copy that used
+// to live at api/schema.json is gone rather than kept in sync.
+//
+// One visible consequence, and it is a change: a missing required field used to
+// be reported at "/" and is now reported at the field itself — "/contact must
+// have required property 'contact'" where it read "/ must have ...". The
+// message is Ajv's own either way; what moved is the path the shared validator
+// puts in front of it.
 function validateManifest(manifest) {
-  if (validate(manifest)) return [];
-  return validate.errors.map((e) => {
-    const where = e.instancePath || '/';
-    return `${where} ${e.message}`;
-  });
+  const { schemaValid, errors } = validateAgainstSchema(manifest);
+  if (schemaValid) return [];
+  return errors.map((e) => `${e.path} ${e.message}`);
 }
 
 function deepEqual(a, b) {

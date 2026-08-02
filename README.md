@@ -28,7 +28,7 @@ It is infrastructure, not a public-facing conceptual repository. The gateway is 
 
 ## Validation boundary
 
-The Diplomat validates every submission against the full canonical [`schema.json`](https://agent-manifest-spec.org/spec/v1.0/schema.json) (AJV, JSON Schema draft 2020-12, using a vendored copy of `spec/v1.0/schema.json`). Submissions that fail schema validation are rejected with the validator's error list.
+The Diplomat validates every submission against the full canonical [`schema.json`](https://agent-manifest-spec.org/spec/v1.0/schema.json) (JSON Schema draft 2020-12). It keeps no copy of the schema and no validator of its own: both come from [`@agent-manifest/client`](https://www.npmjs.com/package/@agent-manifest/client), so a manifest gets the same verdict here as it does from the CLI. Submissions that fail schema validation are rejected with the validator's error list.
 
 Accepted manifests are persisted to `manifests/YYYY/MM/<agent_id>.json` in the [dataset repository](https://github.com/agent-manifest/agent-manifest-dataset). Writes are append-only by construction: the gateway never passes a `sha` to the GitHub Contents API, so an existing declaration can never be overwritten. A duplicate `agent_id` anywhere in the dataset (checked against `registry.json`, case-insensitively) is rejected with `409`. Resubmitting a byte-identical manifest returns `200` with status `already_registered`, so registration is idempotent.
 
