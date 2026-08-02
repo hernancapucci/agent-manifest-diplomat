@@ -1,5 +1,4 @@
 const https = require('https');
-const { validate: validateAgainstSchema } = require('@agent-manifest/client/validate');
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER || 'agent-manifest';
@@ -15,7 +14,25 @@ const DATASET_REPO = process.env.DATASET_REPO || 'agent-manifest-dataset';
 // have required property 'contact'" where it read "/ must have ...". The
 // message is Ajv's own either way; what moved is the path the shared validator
 // puts in front of it.
-function validateManifest(manifest) {
+//
+// It is loaded with import(), not require(). The validator is an ES module and
+// this handler is CommonJS; Node has resolved that combination since 22.12, but
+// Vercel does not run Node's module loader — it resolves require() with its own,
+// which does not implement the interop, and the deployed function threw
+// ERR_REQUIRE_ESM even with the project set to Node 24.x. import() is the one
+// form both loaders implement. The promise is memoised, so a warm instance
+// loads the module once rather than once per request.
+let validatorPromise;
+
+function loadValidator() {
+  if (!validatorPromise) {
+    validatorPromise = import('@agent-manifest/client/validate').then((m) => m.validate);
+  }
+  return validatorPromise;
+}
+
+async function validateManifest(manifest) {
+  const validateAgainstSchema = await loadValidator();
   const { schemaValid, errors } = validateAgainstSchema(manifest);
   if (schemaValid) return [];
   return errors.map((e) => `${e.path} ${e.message}`);
@@ -146,7 +163,7 @@ function createHandler(github) {
       });
     }
 
-    const errors = validateManifest(manifest);
+    const errors = await validateManifest(manifest);
 
     if (errors.length > 0) {
       return res.status(400).json({

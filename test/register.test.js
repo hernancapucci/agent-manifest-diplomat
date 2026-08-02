@@ -200,7 +200,7 @@ test('non-POST method returns 405', async () => {
   assert.strictEqual(res.statusCode, 405);
 });
 
-test('validateManifest accepts all five published dataset manifests', () => {
+test('validateManifest accepts all five published dataset manifests', async () => {
   const fs = require('node:fs');
   const path = require('node:path');
   const dir = path.join(
@@ -215,7 +215,7 @@ test('validateManifest accepts all five published dataset manifests', () => {
   if (!fs.existsSync(dir)) return; // dataset clone not present in CI
   for (const f of fs.readdirSync(dir)) {
     const m = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf-8'));
-    assert.deepStrictEqual(validateManifest(m), [], `${f} should be valid`);
+    assert.deepStrictEqual(await validateManifest(m), [], `${f} should be valid`);
   }
 });
 
