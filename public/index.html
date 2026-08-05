@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Manifest Diplomat — registration gateway</title>
+<meta name="description" content="The registration gateway of the Agent Manifest ecosystem. It receives a manifest, validates it against the published v1.0 JSON Schema, and records it in the public dataset. It does not authenticate, certify, authorise, or enforce anything.">
+<link rel="canonical" href="https://agent-manifest-diplomat.vercel.app/">
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 16px/1.6 ui-serif, Georgia, "Times New Roman", serif;
+    max-width: 42rem; margin: 0 auto; padding: 3rem 1.25rem 5rem;
+    color: #1a1917; background: #f5f4f0;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e8e6e1; background: #161614; }
+    a { color: #9db4d0; }
+    code, .endpoint { background: #232320; }
+  }
+  h1 { font-size: 1.5rem; font-weight: 600; margin: 0 0 .25rem; }
+  .tagline { margin: 0 0 2rem; opacity: .75; }
+  h2 { font-size: 1rem; font-weight: 600; margin: 2rem 0 .5rem; }
+  code, .endpoint {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: .875rem; background: #ebe9e3; padding: .1rem .3rem; border-radius: 3px;
+  }
+  .endpoint { display: block; padding: .6rem .75rem; margin: .5rem 0 0; overflow-x: auto; }
+  ul { padding-left: 1.2rem; }
+  li { margin: .3rem 0; }
+  footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid rgba(128,128,128,.3); font-size: .875rem; opacity: .8; }
+</style>
+</head>
+<body>
+
+<h1>Agent Manifest Diplomat</h1>
+<p class="tagline">Registration gateway for Agent Manifest declarations.</p>
+
+<p>
+  The Diplomat receives an Agent Manifest declaration, checks its structure
+  against the published
+  <a href="https://agent-manifest-spec.org/spec/v1.0/schema.json">v1.0 JSON Schema</a>,
+  refuses a duplicate <code>agent_id</code>, and records what it accepts in the
+  <a href="https://github.com/agent-manifest/agent-manifest-dataset">public dataset</a>.
+  That is the whole of its job.
+</p>
+
+<p>
+  It exists so that publishing a declaration does not require a pull request. The
+  <a href="https://agent-manifest.github.io/agent-manifest-ambassador/">Ambassador</a>
+  helps someone write a manifest and submits it here; the dataset keeps the
+  record and the registry index makes it resolvable.
+</p>
+
+<h2>The endpoint</h2>
+<p>One route, which accepts <code>POST</code> only. A browser visiting it will be refused.</p>
+<code class="endpoint">POST https://agent-manifest-diplomat.vercel.app/api/register</code>
+
+<h2>What it does not do</h2>
+<ul>
+  <li>It does not authenticate anyone. A manifest is not signed and proves nothing about who submitted it.</li>
+  <li>It does not certify, accredit, or issue any mark.</li>
+  <li>It does not authorise an agent to do anything, and grants no permission of any kind.</li>
+  <li>It does not enforce, observe, or constrain how a declared agent then behaves.</li>
+  <li>Acceptance means a document was well formed. It is not a statement about the agent that published it.</li>
+</ul>
+
+<h2>Where to go next</h2>
+<ul>
+  <li><a href="https://agent-manifest-spec.org/">The specification</a> — what an Agent Manifest is</li>
+  <li><a href="https://agent-manifest-spec.org/docs/how-to-register.html">How to register an agent</a> — the steps, including the manual path</li>
+  <li><a href="https://agent-manifest-spec.org/docs/consume/">Reading a manifest from your own software</a></li>
+</ul>
+
+<footer>
+  Source: <a href="https://github.com/agent-manifest/agent-manifest-diplomat">github.com/agent-manifest/agent-manifest-diplomat</a> · MIT ·
+  part of the <a href="https://agent-manifest-spec.org/">Agent Manifest</a> ecosystem
+</footer>
+
+</body>
+</html>
